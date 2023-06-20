@@ -1,7 +1,9 @@
 use rodio::{source::Source, Decoder, OutputStream};
 use std::fs::File;
+use std::io::Write;
 use std::io::{self, BufReader};
-
+use std::thread;
+use std::time;
 fn play_sound() {
     let (_stream, stream_handle) = OutputStream::try_default().unwrap();
     // Load a sound from a file, using a path relative to Cargo.toml
@@ -73,7 +75,48 @@ fn get_pomodoro_config() -> (u32, u32, u32) {
     )
 }
 
-fn main() {
+fn loading_bar(duration: std::time::Duration) {
+    // Create a new thread to run the timer
+    let start_time = time::Instant::now();
+    let timer_thread = thread::spawn(move || {
+        // Loop until the duration is reached
+        while (time::Instant::now() - start_time) < duration {
+            // Clear the current line
+            print!("\r");
+
+            // Calculate the progress percentage
+            let elapsed = time::Instant::now() - start_time;
+            let elapsed_as_seconds = elapsed.as_secs_f32();
+            let duration_as_seconds = duration.as_secs_f32();
+            let progress = (elapsed_as_seconds / duration_as_seconds) * 100.0;
+            let elapsed_as_seconds = elapsed.as_secs_f32() as u32;
+            let duration_as_seconds = duration.as_secs_f32() as u32;
+
+            // Print the loading bar
+            let bar_width = 40;
+            let num_filled = (progress / 100.0 * bar_width as f32) as usize;
+            let num_empty = bar_width - num_filled;
+            print!(
+                "[{}{}]   {}/{}",
+                "=".repeat(num_filled),
+                " ".repeat(num_empty),
+                elapsed_as_seconds,
+                duration_as_seconds
+            );
+
+            // Flush the output to make sure it's immediately displayed
+            io::stdout().flush().unwrap();
+
+            // Delay for a short interval (e.g., 100 milliseconds)
+            thread::sleep(time::Duration::from_millis(100));
+        }
+    });
+
+    // Print a new line after the loading bar completes
+    println!();
+}
+
+fn pomodoro_timer() {
     let (work_session_duration, break_session_duration, number_of_pomodoro_iterations) =
         get_pomodoro_config();
 
@@ -83,6 +126,9 @@ fn main() {
             i, number_of_pomodoro_iterations
         );
         let work_session_duration_in_seconds: u64 = (work_session_duration * 60) as u64;
+        loading_bar(std::time::Duration::from_secs(
+            work_session_duration_in_seconds,
+        ));
         std::thread::sleep(std::time::Duration::from_secs(
             work_session_duration_in_seconds,
         ));
@@ -92,9 +138,15 @@ fn main() {
             i, number_of_pomodoro_iterations
         );
         let break_session_duration_in_seconds: u64 = (break_session_duration * 60) as u64;
+        loading_bar(std::time::Duration::from_secs(
+            break_session_duration_in_seconds,
+        ));
         std::thread::sleep(std::time::Duration::from_secs(
             break_session_duration_in_seconds,
         ));
         play_sound();
     }
+}
+fn main() {
+    pomodoro_timer();
 }
