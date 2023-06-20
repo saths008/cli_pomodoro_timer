@@ -111,3 +111,61 @@ pub fn get_pomodoro_config() -> Config {
     config.print_out_config();
     config
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    #[test]
+    fn build_config_passes_with_valid_inputs() {
+        let config = Config::build("25", "5", "4").unwrap();
+        assert_eq!(config.work_session_duration, 25);
+        assert_eq!(config.break_session_duration, 5);
+        assert_eq!(config.number_of_pomodoro_iterations, 4);
+    }
+
+    #[test]
+    fn get_work_session_duration_is_correct() {
+        let config = Config::build("25", "5", "4").unwrap();
+        assert_eq!(config.get_work_session_duration(), 25);
+    }
+    #[test]
+    fn get_break_session_duration_is_correct() {
+        let config = Config::build("25", "5", "4").unwrap();
+        assert_eq!(config.get_break_session_duration(), 5);
+    }
+    #[test]
+    fn get_number_of_pomodoro_iterations_is_correct() {
+        let config = Config::build("25", "5", "4").unwrap();
+        assert_eq!(config.get_number_of_pomodoro_iterations(), 4);
+    }
+
+    #[test]
+    fn build_config_fails_with_invalid_work_session_duration() {
+        let config = Config::build("fail", "5", "4");
+        assert_eq!(config.is_err(), true);
+        match config {
+            Ok(_) => assert!(false),
+            Err(err) => assert_eq!(err, "Invalid work session duration"),
+        }
+    }
+
+    #[test]
+    fn build_config_fails_with_invalid_break_session_duration() {
+        let config = Config::build("25", "fail", "4");
+        assert_eq!(config.is_err(), true);
+        match config {
+            Ok(_) => assert!(false),
+            Err(err) => assert_eq!(err, "Invalid break session duration"),
+        }
+    }
+
+    #[test]
+    fn build_config_fails_with_invalid_number_of_pomodoro_iterations() {
+        let config = Config::build("25", "5", "fail");
+        assert_eq!(config.is_err(), true);
+        match config {
+            Ok(_) => assert!(false),
+            Err(err) => assert_eq!(err, "Invalid number of pomodoro iterations"),
+        }
+    }
+}
