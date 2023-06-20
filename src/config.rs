@@ -9,9 +9,9 @@ pub struct Config {
 
 impl Config {
     pub fn build(
-        work_session_duration: &String,
-        break_session_duration: &String,
-        number_of_pomodoro_iterations: &String,
+        work_session_duration: &str,
+        break_session_duration: &str,
+        number_of_pomodoro_iterations: &str,
     ) -> Result<Config, &'static str> {
         let work_session_duration: u32 = match work_session_duration.trim().parse() {
             Ok(num) => num,
@@ -57,7 +57,7 @@ impl Config {
         self.number_of_pomodoro_iterations
     }
 
-    pub fn print_out_config(&self) -> () {
+    pub fn print_out_config(&self) {
         println!(
             "Work session duration: {} minutes.",
             self.get_work_session_duration()
