@@ -14,7 +14,7 @@ jobs:
       - uses: dtolnay/rust-toolchain@stable
       - uses: Swatinem/rust-cache@v2
       - name: Install ALSA library
-        run: sudo apt-get install -y libasound2-dev
+        run: apt update && apt install -y libasound2-dev
       - name: Run tests
         run: cargo test
 
@@ -39,7 +39,7 @@ jobs:
           components: clippy
       - uses: Swatinem/rust-cache@v2
       - name: Install ALSA library
-        run: sudo apt-get install -y libasound2-dev
+        run: apt update && apt install -y libasound2-dev
       - name: Linting
         run: cargo clippy -- -D warnings
 
@@ -53,7 +53,7 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v3
       - name: Install ALSA library
-        run: sudo apt-get install -y libasound2-dev
+        run: apt update && apt install -y libasound2-dev
       - name: Generate code coverage
         run: |
           cargo tarpaulin --verbose --workspace
