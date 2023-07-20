@@ -24,6 +24,9 @@ pub fn pomodoro_timer(pomodoro_config: Config) {
         println!();
         println!("Work session complete!");
         play_sound();
+        if i == number_of_pomodoro_iterations {
+            break;
+        }
         println!(
             "Starting break session {} / {}",
             i, number_of_pomodoro_iterations
